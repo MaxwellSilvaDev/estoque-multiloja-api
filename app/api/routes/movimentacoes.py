@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.crud.loja import buscar_loja_por_id
 from app.crud.produto import buscar_produto_por_id
-from app.crud.movimentacao import registrar_entrada, registrar_saida
+from app.crud.movimentacao import (
+    listar_movimentacoes,
+    registrar_entrada,
+    registrar_saida
+)
 from app.db.session import get_db
 from app.schemas.movimentacao import MovimentacaoCreate, MovimentacaoResponse
 
@@ -12,6 +16,22 @@ router = APIRouter(
     prefix="/movimentacoes",
     tags=["Movimentações"]
 )
+
+
+@router.get(
+    "",
+    response_model=list[MovimentacaoResponse]
+)
+def consultar_movimentacoes(
+    loja_id: int | None = None,
+    produto_id: int | None = None,
+    db: Session = Depends(get_db)
+):
+    return listar_movimentacoes(
+        db,
+        loja_id=loja_id,
+        produto_id=produto_id
+    )
 
 
 @router.post(

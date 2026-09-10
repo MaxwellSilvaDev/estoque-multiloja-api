@@ -6,6 +6,32 @@ from app.models.movimentacao import Movimentacao
 from app.schemas.movimentacao import MovimentacaoCreate
 
 
+def listar_movimentacoes(
+    db: Session,
+    loja_id: int | None = None,
+    produto_id: int | None = None
+) -> list[Movimentacao]:
+    consulta = select(Movimentacao)
+
+    if loja_id is not None:
+        consulta = consulta.where(
+            Movimentacao.loja_id == loja_id
+        )
+
+    if produto_id is not None:
+        consulta = consulta.where(
+            Movimentacao.produto_id == produto_id
+        )
+
+    consulta = consulta.order_by(
+        Movimentacao.data.desc()
+    )
+
+    resultado = db.execute(consulta)
+
+    return list(resultado.scalars().all())
+
+
 def registrar_entrada(
     db: Session,
     dados: MovimentacaoCreate
