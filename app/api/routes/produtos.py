@@ -31,7 +31,14 @@ def cadastrar_produto(
     dados: ProdutoCreate,
     db: Session = Depends(get_db)
 ):
-    return criar_produto(db, dados)
+    try:
+        return criar_produto(db, dados)
+
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(erro)
+        )
 
 
 @router.get(
@@ -80,7 +87,18 @@ def editar_produto(
             detail="Produto não encontrado."
         )
 
-    return atualizar_produto(db, produto, dados)
+    try:
+        return atualizar_produto(
+            db,
+            produto,
+            dados
+        )
+
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(erro)
+        )
 
 
 @router.delete(
@@ -99,6 +117,13 @@ def excluir_produto(
             detail="Produto não encontrado."
         )
 
-    deletar_produto(db, produto)
+    try:
+        deletar_produto(db, produto)
+
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(erro)
+        )
 
     return None

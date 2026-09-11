@@ -1,10 +1,10 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EstoqueBase(BaseModel):
-    produto_id: int
-    loja_id: int
-    quantidade: int
+    produto_id: int = Field(gt=0)
+    loja_id: int = Field(gt=0)
+    quantidade: int = Field(ge=0)
 
 
 class EstoqueResponse(EstoqueBase):

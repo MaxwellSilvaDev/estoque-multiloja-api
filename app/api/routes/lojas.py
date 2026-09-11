@@ -95,6 +95,13 @@ def excluir_loja(
             detail="Loja não encontrada."
         )
 
-    deletar_loja(db, loja)
+    try:
+        deletar_loja(db, loja)
+
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(erro)
+        )
 
     return None
