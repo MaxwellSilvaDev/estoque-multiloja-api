@@ -61,3 +61,54 @@ def test_criar_produto_com_sku_duplicado():
     assert segunda_resposta.json()["detail"] == (
         "Já existe um produto com este SKU."
     )
+
+
+def test_nao_excluir_produto_com_movimentacoes():
+    resposta_loja = client.post(
+        "/lojas",
+        json={
+            "nome": "Loja Produto",
+            "endereco": "Rua Produto, 100",
+            "tipo": "matriz"
+        }
+    )
+
+    resposta_produto = client.post(
+        "/produtos",
+        json={
+            "nome": "Produto Protegido",
+            "categoria": "Teste",
+            "preco": 500.00,
+            "sku": "PROTEGIDO-001"
+        }
+    )
+
+    loja_id = resposta_loja.json()["id"]
+    produto_id = resposta_produto.json()["id"]
+
+    resposta_entrada = client.post(
+        "/movimentacoes/entrada",
+        json={
+            "produto_id": produto_id,
+            "loja_id": loja_id,
+            "quantidade": 10
+        }
+    )
+
+    assert resposta_entrada.status_code == 201
+
+    resposta_exclusao = client.delete(
+        f"/produtos/{produto_id}"
+    )
+
+    assert resposta_exclusao.status_code == 409
+
+    assert resposta_exclusao.json()["detail"] == (
+        "Não é possível excluir este produto porque ele possui estoque ou movimentações vinculadas."
+    )
+
+    resposta_consulta = client.get(
+        f"/produtos/{produto_id}"
+    )
+
+    assert resposta_consulta.status_code == 200
