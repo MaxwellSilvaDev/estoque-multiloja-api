@@ -1,5 +1,10 @@
 # 📦 Estoque Multiloja API
 
+![Python](https://img.shields.io/badge/Python-3.13-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-009688)
+![Tests](https://img.shields.io/badge/tests-16%20passing-brightgreen)
+![Deploy](https://img.shields.io/badge/deploy-live-brightgreen)
+
 API REST desenvolvida para gerenciamento de estoque de múltiplas lojas.
 
 O projeto permite cadastrar lojas e produtos, controlar o estoque individual de cada unidade, registrar entradas e saídas de produtos e consultar o histórico de movimentações.
@@ -10,10 +15,12 @@ O objetivo do projeto é aplicar conceitos de desenvolvimento Backend utilizando
 
 ## 🌐 Demonstração online
 
-A API está disponível publicamente para demonstração:
+A API está disponível publicamente para demonstração com dados fictícios de lojas, produtos, estoques e movimentações.
 
-- **API:** https://estoque-multiloja-api.onrender.com
-- **Swagger:** https://estoque-multiloja-api.onrender.com/docs
+### 🔗 Acessos
+
+- 🚀 **[Acessar API](https://estoque-multiloja-api.onrender.com)**
+- 📚 **[Abrir documentação Swagger](https://estoque-multiloja-api.onrender.com/docs)**
 
 > O ambiente público funciona em **modo somente leitura**. Operações de consulta estão liberadas, enquanto operações de escrita são bloqueadas para proteger os dados da demonstração.
 
