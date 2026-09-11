@@ -239,3 +239,66 @@ def test_filtrar_movimentacoes_por_loja():
     assert movimentacoes[0]["produto_id"] == produto_id
     assert movimentacoes[0]["tipo"] == "entrada"
     assert movimentacoes[0]["quantidade"] == 10
+
+
+def test_paginacao_movimentacoes():
+    resposta_loja = client.post(
+        "/lojas",
+        json={
+            "nome": "Loja Paginação",
+            "endereco": "Rua Paginação, 400",
+            "tipo": "matriz"
+        }
+    )
+
+    resposta_produto = client.post(
+        "/produtos",
+        json={
+            "nome": "Produto Paginação",
+            "categoria": "Teste",
+            "preco": 300.00,
+            "sku": "PAGINACAO-001"
+        }
+    )
+
+    loja_id = resposta_loja.json()["id"]
+    produto_id = resposta_produto.json()["id"]
+
+    for quantidade in [5, 3, 2]:
+        resposta = client.post(
+            "/movimentacoes/entrada",
+            json={
+                "produto_id": produto_id,
+                "loja_id": loja_id,
+                "quantidade": quantidade
+            }
+        )
+
+        assert resposta.status_code == 201
+
+    primeira_pagina = client.get(
+        "/movimentacoes?limit=2&offset=0"
+    )
+
+    segunda_pagina = client.get(
+        "/movimentacoes?limit=2&offset=2"
+    )
+
+    assert primeira_pagina.status_code == 200
+    assert segunda_pagina.status_code == 200
+
+    dados_primeira_pagina = primeira_pagina.json()
+    dados_segunda_pagina = segunda_pagina.json()
+
+    assert len(dados_primeira_pagina) == 2
+    assert len(dados_segunda_pagina) == 1
+
+    ids = {
+        movimentacao["id"]
+        for movimentacao in (
+            dados_primeira_pagina
+            + dados_segunda_pagina
+        )
+    }
+
+    assert len(ids) == 3

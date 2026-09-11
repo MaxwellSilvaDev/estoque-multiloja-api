@@ -9,7 +9,9 @@ from app.schemas.movimentacao import MovimentacaoCreate
 def listar_movimentacoes(
     db: Session,
     loja_id: int | None = None,
-    produto_id: int | None = None
+    produto_id: int | None = None,
+    limit: int = 20,
+    offset: int = 0
 ) -> list[Movimentacao]:
     consulta = select(Movimentacao)
 
@@ -23,8 +25,11 @@ def listar_movimentacoes(
             Movimentacao.produto_id == produto_id
         )
 
-    consulta = consulta.order_by(
-        Movimentacao.data.desc()
+    consulta = (
+        consulta
+        .order_by(Movimentacao.data.desc())
+        .limit(limit)
+        .offset(offset)
     )
 
     resultado = db.execute(consulta)

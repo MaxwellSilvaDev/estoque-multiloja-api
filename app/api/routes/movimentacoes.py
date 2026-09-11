@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.crud.loja import buscar_loja_por_id
@@ -25,12 +25,23 @@ router = APIRouter(
 def consultar_movimentacoes(
     loja_id: int | None = None,
     produto_id: int | None = None,
+    limit: int = Query(
+        default=20,
+        ge=1,
+        le=100
+    ),
+    offset: int = Query(
+        default=0,
+        ge=0
+    ),
     db: Session = Depends(get_db)
 ):
     return listar_movimentacoes(
         db,
         loja_id=loja_id,
-        produto_id=produto_id
+        produto_id=produto_id,
+        limit=limit,
+        offset=offset
     )
 
 
