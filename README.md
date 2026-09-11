@@ -8,6 +8,17 @@ O objetivo do projeto é aplicar conceitos de desenvolvimento Backend utilizando
 
 ---
 
+## 🌐 Demonstração online
+
+A API está disponível publicamente para demonstração:
+
+- **API:** https://estoque-multiloja-api.onrender.com
+- **Swagger:** https://estoque-multiloja-api.onrender.com/docs
+
+> O ambiente público funciona em **modo somente leitura**. Operações de consulta estão liberadas, enquanto operações de escrita são bloqueadas para proteger os dados da demonstração.
+
+---
+
 ## 🚀 Tecnologias utilizadas
 
 - Python
@@ -565,7 +576,7 @@ venv\Scripts\python.exe -m pytest -v
 Estado atual:
 
 ```text
-15 testes passando
+16 testes passando
 ```
 
 Os testes cobrem cenários como:
@@ -639,6 +650,8 @@ Principais funcionalidades do Backend implementadas.
 ✅ Migrations
 ✅ Testes automatizados
 ✅ Variáveis de ambiente
+✅ Deploy em ambiente público
+✅ CI/CD com GitHub Actions
 ```
 
 ---
@@ -659,8 +672,6 @@ Uma futura versão do sistema poderá incluir:
 - logs;
 - monitoramento;
 - backups;
-- deploy em ambiente de produção;
-- CI/CD;
 - melhorias para concorrência de movimentações;
 - arquitetura preparada para múltiplas empresas.
 
