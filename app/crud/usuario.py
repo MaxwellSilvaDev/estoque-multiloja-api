@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -27,6 +28,18 @@ def criar_usuario(
 
     except IntegrityError:
         db.rollback()
+
         raise ValueError(
             "Já existe um usuário com este e-mail."
         )
+
+
+def buscar_usuario_por_email(
+    db: Session,
+    email: str,
+) -> Usuario | None:
+    return db.scalar(
+        select(Usuario).where(
+            Usuario.email == email
+        )
+    )

@@ -21,3 +21,19 @@ class UsuarioCreate(BaseModel):
     perfil: Literal["admin", "operador"]
 
     loja_id: int | None = None
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(
+        min_length=3,
+        max_length=255,
+    )
+
+    senha: str = Field(
+        min_length=8,
+    )
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
