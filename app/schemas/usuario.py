@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UsuarioCreate(BaseModel):
@@ -21,6 +21,31 @@ class UsuarioCreate(BaseModel):
     perfil: Literal["admin", "operador"]
 
     loja_id: int | None = None
+
+
+class UsuarioUpdate(BaseModel):
+    nome: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=150,
+    )
+
+    perfil: Literal["admin", "operador"] | None = None
+    ativo: bool | None = None
+    loja_id: int | None = None
+
+
+class UsuarioResponse(BaseModel):
+    id: int
+    nome: str
+    email: str
+    perfil: Literal["admin", "operador"]
+    ativo: bool
+    loja_id: int | None
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 
 class LoginRequest(BaseModel):

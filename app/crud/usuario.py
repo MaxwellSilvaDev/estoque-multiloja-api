@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import gerar_hash_senha
 from app.models.usuario import Usuario
-from app.schemas.usuario import UsuarioCreate
+from app.schemas.usuario import UsuarioCreate, UsuarioUpdate
 
 
 def criar_usuario(
@@ -43,3 +43,55 @@ def buscar_usuario_por_email(
             Usuario.email == email
         )
     )
+
+
+def buscar_usuario_por_id(
+    db: Session,
+    usuario_id: int,
+) -> Usuario | None:
+    return db.get(
+        Usuario,
+        usuario_id,
+    )
+
+
+def listar_usuarios(
+    db: Session,
+) -> list[Usuario]:
+    return list(
+        db.scalars(
+            select(Usuario).order_by(
+                Usuario.id
+            )
+        ).all()
+    )
+
+
+def atualizar_usuario(
+    db: Session,
+    usuario_id: int,
+    dados: UsuarioUpdate,
+) -> Usuario | None:
+    usuario = buscar_usuario_por_id(
+        db,
+        usuario_id,
+    )
+
+    if usuario is None:
+        return None
+
+    atualizacoes = dados.model_dump(
+        exclude_unset=True,
+    )
+
+    for campo, valor in atualizacoes.items():
+        setattr(
+            usuario,
+            campo,
+            valor,
+        )
+
+    db.commit()
+    db.refresh(usuario)
+
+    return usuario
