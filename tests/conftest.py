@@ -71,3 +71,12 @@ def limpar_banco():
     )
 
     yield
+
+@pytest.fixture
+def db_session():
+    db = TestingSessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
