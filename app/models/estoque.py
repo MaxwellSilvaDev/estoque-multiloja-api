@@ -11,27 +11,36 @@ class Estoque(Base):
 
     produto_id: Mapped[int] = mapped_column(
         ForeignKey("produtos.id"),
-        nullable=False
+        nullable=False,
     )
 
     loja_id: Mapped[int] = mapped_column(
         ForeignKey("lojas.id"),
-        nullable=False
+        nullable=False,
     )
 
     quantidade: Mapped[int] = mapped_column(
         nullable=False,
-        default=0
+        default=0,
+    )
+
+    estoque_minimo: Mapped[int] = mapped_column(
+        nullable=False,
+        default=0,
     )
 
     __table_args__ = (
         UniqueConstraint(
             "produto_id",
             "loja_id",
-            name="uq_estoque_produto_loja"
+            name="uq_estoque_produto_loja",
         ),
         CheckConstraint(
             "quantidade >= 0",
-            name="ck_estoque_quantidade_nao_negativa"
+            name="ck_estoque_quantidade_nao_negativa",
+        ),
+        CheckConstraint(
+            "estoque_minimo >= 0",
+            name="ck_estoque_minimo_nao_negativo",
         ),
     )

@@ -2,14 +2,17 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-009688)
-![Tests](https://img.shields.io/badge/tests-16%20passing-brightgreen)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
+![Tests](https://img.shields.io/badge/tests-104%20passing-brightgreen)
 ![Deploy](https://img.shields.io/badge/deploy-live-brightgreen)
 
 API REST desenvolvida para gerenciamento de estoque de múltiplas lojas.
 
-O projeto permite cadastrar lojas e produtos, controlar o estoque individual de cada unidade, registrar entradas e saídas de produtos e consultar o histórico de movimentações.
+O projeto permite cadastrar lojas e produtos, controlar o estoque individual de cada unidade, registrar entradas e saídas, consultar movimentações, configurar estoque mínimo e identificar itens com estoque baixo.
 
-O objetivo do projeto é aplicar conceitos de desenvolvimento Backend utilizando Python, FastAPI, SQLAlchemy e PostgreSQL, com migrations, validações, tratamento de erros e testes automatizados.
+A versão **v1.1.0** também adiciona autenticação JWT, usuários, perfis de acesso e restrições por loja.
+
+O objetivo do projeto é aplicar conceitos de desenvolvimento Backend utilizando Python, FastAPI, SQLAlchemy e PostgreSQL, com autenticação, migrations, validações, regras de negócio, tratamento de erros e testes automatizados.
 
 ---
 
@@ -19,71 +22,183 @@ A API está disponível publicamente para demonstração com dados fictícios de
 
 ### 🔗 Acessos
 
-- 🚀 **[Acessar API](https://estoque-multiloja-api.onrender.com)**
-- 📚 **[Abrir documentação Swagger](https://estoque-multiloja-api.onrender.com/docs)**
+* 🚀 **[Acessar API](https://estoque-multiloja-api.onrender.com)**
+* 📚 **[Abrir documentação Swagger](https://estoque-multiloja-api.onrender.com/docs)**
 
-> O ambiente público funciona em **modo somente leitura**. Operações de consulta estão liberadas, enquanto operações de escrita são bloqueadas para proteger os dados da demonstração.
+> O ambiente público funciona em **modo somente leitura**. Operações de consulta estão liberadas, enquanto operações que alteram dados permanecem bloqueadas.
+
+A rota de login é liberada no ambiente de demonstração para permitir autenticação:
+
+```http
+POST /auth/login
+```
+
+---
+
+## 🆕 Versão atual
+
+```text
+v1.1.0
+```
+
+Principais evoluções em relação à v1.0.1:
+
+* autenticação com JWT;
+* cadastro e gerenciamento de usuários;
+* perfis `admin` e `operador`;
+* controle de acesso por loja;
+* proteção dos endpoints;
+* estoque mínimo por produto e loja;
+* alertas de estoque baixo;
+* filtros de produtos;
+* filtro de movimentações por tipo;
+* ampliação da suíte automatizada para 104 testes.
 
 ---
 
 ## 🚀 Tecnologias utilizadas
 
-- Python
-- FastAPI
-- SQLAlchemy
-- PostgreSQL
-- Alembic
-- Pydantic
-- Pytest
-- SQLite para testes automatizados
-- Docker Compose
-- Git e GitHub
+* Python
+* FastAPI
+* SQLAlchemy
+* PostgreSQL
+* Alembic
+* Pydantic
+* PyJWT
+* bcrypt
+* Pytest
+* SQLite para testes automatizados
+* Docker Compose
+* Git e GitHub
 
 ---
 
 ## ⚙️ Funcionalidades
 
-A API possui atualmente as seguintes funcionalidades:
+### 🔐 Autenticação
+
+* Login utilizando e-mail e senha
+* Geração de access token JWT
+* Token Bearer
+* Validade de 60 minutos
+* Rejeição de tokens inválidos
+* Rejeição de tokens expirados
+* Bloqueio de usuários inativos
+* Integração com o botão **Authorize** do Swagger
+
+### 👥 Usuários
+
+* Cadastrar usuário
+* Listar usuários
+* Buscar usuário por ID
+* Atualizar usuário
+* Ativar e desativar usuários
+* E-mail único
+* Senha mínima de 8 caracteres
+* Senhas armazenadas somente através de hash
+* Criação do primeiro administrador por script
+
+### 🛡️ Perfis e permissões
+
+Existem dois perfis:
+
+```text
+admin
+operador
+```
+
+#### Admin
+
+O administrador pode:
+
+* gerenciar usuários;
+* cadastrar, editar e excluir lojas;
+* cadastrar, editar e excluir produtos;
+* consultar estoques de qualquer loja;
+* consultar movimentações de qualquer loja;
+* registrar movimentações;
+* configurar estoque mínimo;
+* consultar alertas de estoque baixo de qualquer loja.
+
+#### Operador
+
+O operador é vinculado obrigatoriamente a uma loja.
+
+Pode:
+
+* consultar a própria loja;
+* consultar produtos;
+* consultar estoque da própria loja;
+* consultar movimentações da própria loja;
+* registrar entradas e saídas na própria loja;
+* consultar alertas de estoque baixo da própria loja.
+
+Não pode:
+
+* gerenciar usuários;
+* cadastrar, editar ou excluir lojas;
+* cadastrar, editar ou excluir produtos;
+* configurar estoque mínimo;
+* acessar estoque ou movimentações de outra loja.
+
+Tentativas de acesso a outra loja retornam:
+
+```text
+403 Forbidden
+```
 
 ### 🏪 Lojas
 
-- Cadastrar loja
-- Listar lojas
-- Buscar loja por ID
-- Atualizar loja
-- Excluir loja
-- Validação dos tipos `matriz` e `filial`
-- Proteção contra exclusão de lojas que possuem estoque ou movimentações vinculadas
+* Cadastrar loja
+* Listar lojas
+* Buscar loja por ID
+* Atualizar loja
+* Excluir loja
+* Validação dos tipos `matriz` e `filial`
+* Proteção contra exclusão de lojas com estoque ou movimentações vinculadas
+* Controle de acesso conforme o perfil autenticado
 
 ### 📦 Produtos
 
-- Cadastrar produto
-- Listar produtos
-- Buscar produto por ID
-- Atualizar produto
-- Excluir produto
-- Validação de preço
-- SKU único para cada produto
-- Proteção contra exclusão de produtos que possuem estoque ou movimentações vinculadas
+* Cadastrar produto
+* Listar produtos
+* Buscar produto por ID
+* Atualizar produto
+* Excluir produto
+* Validação de preço
+* SKU único
+* Filtro por nome
+* Filtro por categoria
+* Filtro por SKU
+* Combinação de filtros
+* Proteção contra exclusão de produtos com estoque ou movimentações vinculadas
 
 ### 📊 Estoque
 
-- Consultar estoque de uma loja
-- Consultar estoque de um produto em uma loja específica
-- Controle independente de quantidade para cada loja
-- Impedimento de estoque negativo
+* Consultar estoque de uma loja
+* Consultar estoque de um produto em uma loja específica
+* Controle independente por loja
+* Impedimento de estoque negativo
+* Estoque mínimo por produto e loja
+* Configuração de estoque mínimo por administrador
+* Valor padrão de estoque mínimo igual a `0`
+* Consulta de alertas de estoque baixo
+* Controle de acesso por loja
 
 ### 🔄 Movimentações
 
-- Registrar entrada de produtos
-- Registrar saída de produtos
-- Atualização automática do estoque
-- Validação de saldo disponível
-- Impedimento de saída superior ao estoque disponível
-- Histórico de movimentações
-- Filtro por loja
-- Filtro por produto
-- Paginação utilizando `limit` e `offset`
+* Registrar entrada
+* Registrar saída
+* Atualização automática do estoque
+* Validação de saldo disponível
+* Impedimento de saída superior ao saldo
+* Histórico de movimentações
+* Filtro por loja
+* Filtro por produto
+* Filtro por tipo
+* Combinação de filtros
+* Paginação utilizando `limit` e `offset`
+* Restrição automática do operador à própria loja
 
 ---
 
@@ -99,20 +214,28 @@ estoque-multiloja-api/
 │
 ├── app/
 │   ├── api/
+│   │   ├── dependencies/
+│   │   │   ├── auth.py
+│   │   │   └── permissoes.py
+│   │   │
 │   │   └── routes/
+│   │       ├── auth.py
 │   │       ├── estoques.py
 │   │       ├── lojas.py
 │   │       ├── movimentacoes.py
-│   │       └── produtos.py
+│   │       ├── produtos.py
+│   │       └── usuarios.py
 │   │
 │   ├── core/
-│   │   └── config.py
+│   │   ├── config.py
+│   │   └── security.py
 │   │
 │   ├── crud/
 │   │   ├── estoque.py
 │   │   ├── loja.py
 │   │   ├── movimentacao.py
-│   │   └── produto.py
+│   │   ├── produto.py
+│   │   └── usuario.py
 │   │
 │   ├── db/
 │   │   ├── base.py
@@ -122,22 +245,28 @@ estoque-multiloja-api/
 │   │   ├── estoque.py
 │   │   ├── loja.py
 │   │   ├── movimentacao.py
-│   │   └── produto.py
+│   │   ├── produto.py
+│   │   └── usuario.py
 │   │
 │   ├── schemas/
+│   │   ├── auth.py
 │   │   ├── estoque.py
 │   │   ├── loja.py
 │   │   ├── movimentacao.py
-│   │   └── produto.py
+│   │   ├── produto.py
+│   │   └── usuario.py
+│   │
+│   ├── scripts/
+│   │   └── create_admin.py
 │   │
 │   └── main.py
 │
+├── docs/
+│   └── superpowers/
+│       ├── plans/
+│       └── specs/
+│
 ├── tests/
-│   ├── conftest.py
-│   ├── test_estoques.py
-│   ├── test_lojas.py
-│   ├── test_movimentacoes.py
-│   └── test_produtos.py
 │
 ├── .env.example
 ├── .gitignore
@@ -151,7 +280,7 @@ estoque-multiloja-api/
 
 ## 🗃️ Modelo de dados
 
-O sistema trabalha com quatro entidades principais:
+O sistema trabalha principalmente com cinco entidades.
 
 ### Loja
 
@@ -166,7 +295,7 @@ endereco
 tipo
 ```
 
-O tipo da loja pode ser:
+Tipos permitidos:
 
 ```text
 matriz
@@ -175,9 +304,7 @@ filial
 
 ### Produto
 
-Representa os produtos cadastrados no sistema.
-
-Principais campos:
+Representa os produtos cadastrados.
 
 ```text
 id
@@ -191,16 +318,19 @@ Cada produto possui um SKU único.
 
 ### Estoque
 
-Relaciona um produto a uma loja e armazena sua quantidade disponível.
+Relaciona um produto a uma loja.
 
 ```text
 id
 produto_id
 loja_id
 quantidade
+estoque_minimo
 ```
 
-Um mesmo produto pode possuir quantidades diferentes em lojas diferentes.
+Um mesmo produto pode possuir quantidades e estoques mínimos diferentes em lojas diferentes.
+
+Cada combinação de produto e loja possui apenas um registro de estoque.
 
 ### Movimentação
 
@@ -215,12 +345,34 @@ quantidade
 data
 ```
 
-Os principais tipos de movimentação utilizados atualmente são:
+Os principais tipos utilizados pela API são:
 
 ```text
 entrada
 saida
 ```
+
+### Usuário
+
+Representa uma conta que pode acessar a API.
+
+```text
+id
+nome
+email
+senha_hash
+perfil
+ativo
+loja_id
+```
+
+Regras importantes:
+
+* e-mail único;
+* senha nunca armazenada em texto puro;
+* administrador pode não possuir loja;
+* operador deve possuir uma loja vinculada;
+* usuário inativo não pode autenticar.
 
 ---
 
@@ -234,9 +386,9 @@ Produto 1:N Estoque
 Loja 1:N Movimentação
 
 Produto 1:N Movimentação
-```
 
-Cada combinação de produto e loja possui apenas um registro de estoque.
+Loja 1:N Usuário
+```
 
 ---
 
@@ -244,14 +396,14 @@ Cada combinação de produto e loja possui apenas um registro de estoque.
 
 Antes de executar o projeto, tenha instalado:
 
-- Python
-- PostgreSQL
-- Git
+* Python
+* PostgreSQL
+* Git
 
 Opcionalmente:
 
-- Docker
-- Docker Compose
+* Docker
+* Docker Compose
 
 ---
 
@@ -266,8 +418,6 @@ Entre na pasta:
 ```bash
 cd estoque-multiloja-api
 ```
-
-> Caso o repositório esteja privado, é necessário possuir permissão de acesso no GitHub.
 
 ---
 
@@ -297,7 +447,7 @@ pip install -r requirements.txt
 
 ## 🔐 Configuração das variáveis de ambiente
 
-O projeto possui um arquivo:
+O projeto possui:
 
 ```text
 .env.example
@@ -309,44 +459,45 @@ Crie uma cópia chamada:
 .env
 ```
 
-Exemplo:
+Exemplo de configuração:
 
 ```env
 POSTGRES_USER=seu_usuario
 POSTGRES_PASSWORD=sua_senha
 POSTGRES_DB=estoque_multiloja
+
 DATABASE_URL=postgresql+psycopg2://seu_usuario:sua_senha@localhost:5432/estoque_multiloja
+
+JWT_SECRET=gere_uma_chave_secreta_forte
+JWT_ALGORITHM=HS256
+JWT_EXP_MINUTES=60
+
+DEMO_READ_ONLY=false
 ```
 
-O arquivo `.env` contém informações sensíveis e não deve ser enviado para o GitHub.
+> Nunca envie o arquivo `.env`, senhas, `DATABASE_URL` real ou `JWT_SECRET` para o repositório.
 
 ---
 
 ## 🐘 Banco de dados com Docker
 
-O projeto possui um arquivo `docker-compose.yml` que pode ser utilizado para iniciar o PostgreSQL.
-
-Execute:
+O projeto possui `docker-compose.yml`, que pode ser utilizado para iniciar o PostgreSQL.
 
 ```bash
 docker compose up -d
 ```
 
-Isso iniciará o banco PostgreSQL configurado para o projeto.
-
-Caso utilize uma instalação local do PostgreSQL, ajuste a variável `DATABASE_URL` conforme a porta e as credenciais do seu ambiente.
+Caso utilize PostgreSQL instalado localmente, configure a `DATABASE_URL` para o seu ambiente.
 
 ---
 
 ## 🗄️ Executando as migrations
 
-Com o banco de dados funcionando, execute:
+Com o banco funcionando:
 
 ```bash
 alembic upgrade head
 ```
-
-Esse comando cria e atualiza as tabelas necessárias no banco de dados.
 
 Para verificar a migration atual:
 
@@ -354,17 +505,39 @@ Para verificar a migration atual:
 alembic current
 ```
 
+Na v1.1.0, o banco deve alcançar:
+
+```text
+b8d7e843d31e (head)
+```
+
+---
+
+## 👤 Criando o primeiro administrador
+
+O sistema não possui cadastro público de usuários.
+
+O primeiro administrador pode ser criado através do script:
+
+```bash
+python -m app.scripts.create_admin
+```
+
+O script solicita os dados necessários de forma interativa.
+
+A senha não é exibida nem armazenada em texto puro.
+
+Após a criação do primeiro administrador, novos usuários podem ser cadastrados pelos endpoints administrativos da API.
+
 ---
 
 ## ▶️ Executando a API
-
-Inicie o servidor utilizando:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-A aplicação ficará disponível em:
+Aplicação:
 
 ```text
 http://127.0.0.1:8000
@@ -372,25 +545,47 @@ http://127.0.0.1:8000
 
 ---
 
-## 📖 Documentação Swagger
+## 📖 Swagger e ReDoc
 
-O FastAPI gera automaticamente uma interface para visualizar e testar os endpoints.
-
-Acesse:
+Swagger:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-Também é possível acessar a documentação ReDoc:
+ReDoc:
 
 ```text
 http://127.0.0.1:8000/redoc
 ```
 
+Para acessar endpoints protegidos:
+
+1. faça login em `/auth/login`;
+2. copie o `access_token`;
+3. clique em **Authorize** no Swagger;
+4. informe o token Bearer.
+
 ---
 
 ## 🛣️ Principais endpoints
+
+### Autenticação
+
+```http
+POST /auth/login
+```
+
+### Usuários
+
+```http
+POST /usuarios
+GET /usuarios
+GET /usuarios/{usuario_id}
+PATCH /usuarios/{usuario_id}
+```
+
+Endpoints de usuários são administrativos.
 
 ### Lojas
 
@@ -414,33 +609,45 @@ DELETE /produtos/{produto_id}
 
 ### Estoques
 
-Consultar todos os estoques de uma loja:
+Consultar os estoques de uma loja:
 
 ```http
 GET /estoques/loja/{loja_id}
 ```
 
-Consultar um produto específico dentro de uma loja:
+Consultar um produto em uma loja:
 
 ```http
 GET /estoques/loja/{loja_id}/produto/{produto_id}
 ```
 
+Configurar estoque mínimo:
+
+```http
+PATCH /estoques/loja/{loja_id}/produto/{produto_id}/minimo
+```
+
+Consultar alertas de estoque baixo:
+
+```http
+GET /estoques/loja/{loja_id}/alertas/baixo
+```
+
 ### Movimentações
 
-Registrar entrada:
+Entrada:
 
 ```http
 POST /movimentacoes/entrada
 ```
 
-Registrar saída:
+Saída:
 
 ```http
 POST /movimentacoes/saida
 ```
 
-Consultar histórico:
+Histórico:
 
 ```http
 GET /movimentacoes
@@ -448,35 +655,111 @@ GET /movimentacoes
 
 ---
 
+## 🔐 Exemplo de login
+
+Requisição:
+
+```http
+POST /auth/login
+```
+
+Body:
+
+```json
+{
+  "email": "usuario@example.com",
+  "senha": "sua_senha"
+}
+```
+
+Resposta válida:
+
+```json
+{
+  "access_token": "<token-jwt>",
+  "token_type": "bearer"
+}
+```
+
+O token deve ser enviado nos endpoints protegidos:
+
+```text
+Authorization: Bearer <token-jwt>
+```
+
+---
+
+## 🔎 Filtros de produtos
+
+O endpoint:
+
+```http
+GET /produtos
+```
+
+aceita filtros opcionais.
+
+### Nome
+
+Busca parcial e case-insensitive:
+
+```http
+GET /produtos?nome=arroz
+```
+
+### Categoria
+
+```http
+GET /produtos?categoria=Alimentos
+```
+
+### SKU
+
+```http
+GET /produtos?sku=PROD-001
+```
+
+### Combinando filtros
+
+```http
+GET /produtos?nome=gamer&categoria=Periféricos&sku=PROD-001
+```
+
+---
+
 ## 🔎 Filtros de movimentações
 
-O histórico permite filtros opcionais.
-
-Por loja:
+### Por loja
 
 ```http
 GET /movimentacoes?loja_id=1
 ```
 
-Por produto:
+### Por produto
 
 ```http
 GET /movimentacoes?produto_id=1
 ```
 
-Com os dois filtros:
+### Por tipo
 
 ```http
-GET /movimentacoes?loja_id=1&produto_id=1
+GET /movimentacoes?tipo=saida
 ```
+
+### Combinados
+
+```http
+GET /movimentacoes?loja_id=1&produto_id=1&tipo=saida
+```
+
+Mesmo utilizando filtros, operadores continuam limitados à própria loja.
 
 ---
 
 ## 📄 Paginação
 
-O endpoint de movimentações possui paginação utilizando `limit` e `offset`.
-
-Exemplo:
+O histórico de movimentações possui paginação com `limit` e `offset`.
 
 ```http
 GET /movimentacoes?limit=20&offset=0
@@ -488,10 +771,10 @@ Próxima página:
 GET /movimentacoes?limit=20&offset=20
 ```
 
-Também é possível combinar paginação e filtros:
+Com filtros:
 
 ```http
-GET /movimentacoes?loja_id=1&produto_id=1&limit=10&offset=0
+GET /movimentacoes?loja_id=1&produto_id=1&tipo=saida&limit=10&offset=0
 ```
 
 O valor máximo permitido para `limit` é:
@@ -522,17 +805,16 @@ Body:
 
 A API:
 
-1. verifica se o produto existe;
-2. verifica se a loja existe;
-3. localiza ou cria o estoque;
-4. adiciona a quantidade;
-5. registra a movimentação.
+1. verifica se o usuário possui acesso à loja;
+2. verifica se o produto existe;
+3. verifica se a loja existe;
+4. localiza ou cria o estoque;
+5. adiciona a quantidade;
+6. registra a movimentação.
 
 ---
 
 ## 📤 Exemplo de saída de estoque
-
-Requisição:
 
 ```http
 POST /movimentacoes/saida
@@ -548,9 +830,9 @@ Body:
 }
 ```
 
-Antes de realizar a saída, a API verifica se existe saldo suficiente.
+A API verifica se existe saldo suficiente.
 
-Caso não exista:
+Caso contrário:
 
 ```json
 {
@@ -560,47 +842,112 @@ Caso não exista:
 
 ---
 
+## 📉 Estoque mínimo
+
+O estoque mínimo é configurado individualmente para cada combinação de produto e loja.
+
+Endpoint administrativo:
+
+```http
+PATCH /estoques/loja/{loja_id}/produto/{produto_id}/minimo
+```
+
+Body:
+
+```json
+{
+  "estoque_minimo": 10
+}
+```
+
+Regras:
+
+* somente administradores podem alterar;
+* operadores podem visualizar;
+* valor negativo é inválido;
+* novos registros de estoque começam com mínimo `0`.
+
+---
+
+## 🚨 Alertas de estoque baixo
+
+Endpoint:
+
+```http
+GET /estoques/loja/{loja_id}/alertas/baixo
+```
+
+Um estoque entra no alerta quando:
+
+```text
+estoque_minimo > 0
+e
+quantidade <= estoque_minimo
+```
+
+Se `estoque_minimo` for `0`, o item não aparece como alerta configurado.
+
+Administradores podem consultar qualquer loja.
+
+Operadores podem consultar somente a própria loja.
+
+---
+
 ## 🧪 Testes automatizados
 
-O projeto possui testes automatizados utilizando `pytest` e `FastAPI TestClient`.
+O projeto utiliza `pytest` e `FastAPI TestClient`.
 
-Durante os testes é utilizado um banco SQLite em memória, separado do PostgreSQL utilizado pela aplicação.
+Durante os testes é utilizado um banco SQLite isolado do PostgreSQL da aplicação.
 
-As foreign keys são ativadas no ambiente de testes para validar corretamente as regras de integridade.
+As foreign keys são ativadas no ambiente de testes para validar as regras de integridade.
 
-Execute todos os testes com:
+Execute:
 
 ```bash
 python -m pytest -v
 ```
 
-No Windows também é possível utilizar diretamente o Python do ambiente virtual:
+Ou no Windows:
 
 ```bash
 venv\Scripts\python.exe -m pytest -v
 ```
 
-Estado atual:
+Estado validado da v1.1.0:
 
 ```text
-16 testes passando
+104 testes passando
 ```
 
 Os testes cobrem cenários como:
 
-- cadastro de lojas;
-- validação do tipo de loja;
-- cadastro de produtos;
-- validação de preço;
-- SKU duplicado;
-- entrada de estoque;
-- saída de estoque;
-- saldo insuficiente;
-- consultas de estoque;
-- filtros de movimentações;
-- paginação;
-- proteção contra exclusão de produtos vinculados;
-- proteção contra exclusão de lojas vinculadas.
+* autenticação;
+* JWT válido, inválido e expirado;
+* usuário inativo;
+* hash de senha;
+* cadastro de usuários;
+* e-mail duplicado;
+* criação do primeiro administrador;
+* permissões de admin;
+* permissões de operador;
+* bloqueio entre lojas;
+* cadastro de lojas;
+* cadastro de produtos;
+* preço inválido;
+* SKU duplicado;
+* entrada de estoque;
+* saída de estoque;
+* saldo insuficiente;
+* consultas de estoque;
+* estoque mínimo;
+* estoque mínimo negativo;
+* alertas de estoque baixo;
+* filtros de produtos;
+* combinação de filtros;
+* filtros de movimentações;
+* paginação;
+* proteção contra exclusão de registros vinculados;
+* comportamento do modo de demonstração.
 
 ---
 
@@ -608,40 +955,52 @@ Os testes cobrem cenários como:
 
 Algumas regras implementadas:
 
-- O estoque nunca pode possuir quantidade negativa.
-- Uma saída não pode ser maior que o saldo disponível.
-- O SKU de um produto deve ser único.
-- Cada combinação de produto e loja possui apenas um estoque.
-- Quantidades movimentadas devem ser maiores que zero.
-- Produtos vinculados a estoque ou movimentações não podem ser excluídos.
-- Lojas vinculadas a estoque ou movimentações não podem ser excluídas.
-- O histórico de movimentações pode ser filtrado e paginado.
+* senhas nunca são armazenadas em texto puro;
+* usuários inativos não podem autenticar;
+* somente administradores gerenciam usuários;
+* somente administradores alteram lojas e produtos;
+* operador pertence obrigatoriamente a uma loja;
+* operador não pode acessar dados de outra loja;
+* estoque nunca pode possuir quantidade negativa;
+* saída não pode ser maior que o saldo;
+* SKU deve ser único;
+* cada combinação produto + loja possui apenas um estoque;
+* quantidades movimentadas devem ser maiores que zero;
+* estoque mínimo não pode ser negativo;
+* alertas exigem estoque mínimo maior que zero;
+* produtos vinculados não podem ser excluídos;
+* lojas vinculadas não podem ser excluídas;
+* histórico pode ser filtrado e paginado.
 
 ---
 
 ## 🧰 Migrations
 
-O gerenciamento do schema do banco é realizado com Alembic.
+O schema do banco é gerenciado pelo Alembic.
 
-Criar uma nova migration:
+Criar uma migration:
 
 ```bash
 alembic revision --autogenerate -m "descricao da migration"
 ```
 
-Aplicar migrations:
+Aplicar:
 
 ```bash
 alembic upgrade head
+```
+
+Verificar:
+
+```bash
+alembic current
 ```
 
 ---
 
 ## 📌 Status do projeto
 
-### MVP
-
-Principais funcionalidades do Backend implementadas.
+### v1.1.0
 
 ```text
 ✅ Cadastro de lojas
@@ -650,13 +1009,26 @@ Principais funcionalidades do Backend implementadas.
 ✅ Entrada de produtos
 ✅ Saída de produtos
 ✅ Histórico de movimentações
-✅ Filtros
 ✅ Paginação
+✅ Autenticação JWT
+✅ Usuários
+✅ Hash seguro de senha
+✅ Perfis admin e operador
+✅ Controle de acesso por loja
+✅ Proteção dos endpoints
+✅ Ativação e desativação de usuários
+✅ Script para primeiro administrador
+✅ Estoque mínimo
+✅ Alertas de estoque baixo
+✅ Filtros de produtos
+✅ Filtro de movimentações por tipo
+✅ Combinação de filtros
 ✅ Validações
 ✅ Tratamento de conflitos
 ✅ Migrations
-✅ Testes automatizados
+✅ 104 testes automatizados
 ✅ Variáveis de ambiente
+✅ Modo público somente leitura
 ✅ Deploy em ambiente público
 ✅ CI/CD com GitHub Actions
 ```
@@ -665,30 +1037,27 @@ Principais funcionalidades do Backend implementadas.
 
 ## 🔮 Próximas evoluções
 
-Uma futura versão do sistema poderá incluir:
+Possíveis evoluções futuras:
 
-- autenticação com JWT;
-- cadastro de usuários;
-- perfis e permissões;
-- controle de acesso por loja;
-- dashboard web;
-- frontend integrado à API;
-- relatórios de estoque;
-- estoque mínimo e alertas;
-- auditoria;
-- logs;
-- monitoramento;
-- backups;
-- melhorias para concorrência de movimentações;
-- arquitetura preparada para múltiplas empresas.
+* dashboard web;
+* frontend integrado;
+* relatórios de estoque;
+* auditoria detalhada;
+* logs estruturados;
+* monitoramento;
+* backups automatizados;
+* recuperação de senha;
+* refresh token;
+* melhorias adicionais de concorrência;
+* arquitetura multiempresa.
 
 ---
 
 ## 🎯 Objetivo
 
-Este projeto foi desenvolvido como parte do meu portfólio de desenvolvimento Backend, com foco na construção de uma API organizada, testável e baseada em regras de negócio reais.
+Este projeto foi desenvolvido como parte do meu portfólio de desenvolvimento Backend, com foco na construção de uma API organizada, segura, testável e baseada em regras de negócio reais.
 
-Ele também serve como base para futuras evoluções até uma aplicação completa de gerenciamento de estoque.
+A evolução da v1.0.1 para a v1.1.0 adiciona uma camada completa de autenticação e autorização, além de recursos operacionais de estoque mínimo, alertas e consultas mais flexíveis.
 
 ---
 

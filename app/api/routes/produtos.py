@@ -1,70 +1,90 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.dependencies.auth import obter_usuario_atual
+from app.api.dependencies.permissoes import exigir_admin
 from app.crud.produto import (
-    criar_produto,
-    listar_produtos,
-    buscar_produto_por_id,
     atualizar_produto,
-    deletar_produto
+    buscar_produto_por_id,
+    criar_produto,
+    deletar_produto,
+    listar_produtos,
 )
 from app.db.session import get_db
+from app.models.usuario import Usuario
 from app.schemas.produto import (
     ProdutoCreate,
     ProdutoResponse,
-    ProdutoUpdate
+    ProdutoUpdate,
 )
 
 
 router = APIRouter(
     prefix="/produtos",
-    tags=["Produtos"]
+    tags=["Produtos"],
 )
 
 
 @router.post(
     "",
     response_model=ProdutoResponse,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
 def cadastrar_produto(
     dados: ProdutoCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(exigir_admin),
 ):
     try:
-        return criar_produto(db, dados)
+        return criar_produto(
+            db,
+            dados,
+        )
 
     except ValueError as erro:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=str(erro)
+            detail=str(erro),
         )
 
 
 @router.get(
     "",
-    response_model=list[ProdutoResponse]
+    response_model=list[ProdutoResponse],
 )
 def consultar_produtos(
-    db: Session = Depends(get_db)
+    nome: str | None = None,
+    categoria: str | None = None,
+    sku: str | None = None,
+    db: Session = Depends(get_db),
+    usuario_atual: Usuario = Depends(obter_usuario_atual),
 ):
-    return listar_produtos(db)
+    return listar_produtos(
+        db,
+        nome=nome,
+        categoria=categoria,
+        sku=sku,
+    )
 
 
 @router.get(
     "/{produto_id}",
-    response_model=ProdutoResponse
+    response_model=ProdutoResponse,
 )
 def consultar_produto_por_id(
     produto_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    usuario_atual: Usuario = Depends(obter_usuario_atual),
 ):
-    produto = buscar_produto_por_id(db, produto_id)
+    produto = buscar_produto_por_id(
+        db,
+        produto_id,
+    )
 
     if produto is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Produto não encontrado."
+            detail="Produto não encontrado.",
         )
 
     return produto
@@ -72,58 +92,69 @@ def consultar_produto_por_id(
 
 @router.patch(
     "/{produto_id}",
-    response_model=ProdutoResponse
+    response_model=ProdutoResponse,
 )
 def editar_produto(
     produto_id: int,
     dados: ProdutoUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(exigir_admin),
 ):
-    produto = buscar_produto_por_id(db, produto_id)
+    produto = buscar_produto_por_id(
+        db,
+        produto_id,
+    )
 
     if produto is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Produto não encontrado."
+            detail="Produto não encontrado.",
         )
 
     try:
         return atualizar_produto(
             db,
             produto,
-            dados
+            dados,
         )
 
     except ValueError as erro:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=str(erro)
+            detail=str(erro),
         )
 
 
 @router.delete(
     "/{produto_id}",
-    status_code=status.HTTP_204_NO_CONTENT
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 def excluir_produto(
     produto_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(exigir_admin),
 ):
-    produto = buscar_produto_por_id(db, produto_id)
+    produto = buscar_produto_por_id(
+        db,
+        produto_id,
+    )
 
     if produto is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Produto não encontrado."
+            detail="Produto não encontrado.",
         )
 
     try:
-        deletar_produto(db, produto)
+        deletar_produto(
+            db,
+            produto,
+        )
 
     except ValueError as erro:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=str(erro)
+            detail=str(erro),
         )
 
     return None

@@ -8,7 +8,7 @@ from app.schemas.produto import ProdutoCreate, ProdutoUpdate
 
 def criar_produto(
     db: Session,
-    dados: ProdutoCreate
+    dados: ProdutoCreate,
 ) -> Produto:
     produto = Produto(**dados.model_dump())
 
@@ -27,10 +27,30 @@ def criar_produto(
 
 
 def listar_produtos(
-    db: Session
+    db: Session,
+    nome: str | None = None,
+    categoria: str | None = None,
+    sku: str | None = None,
 ) -> list[Produto]:
+    consulta = select(Produto)
+
+    if nome is not None:
+        consulta = consulta.where(
+            Produto.nome.ilike(f"%{nome}%")
+        )
+
+    if categoria is not None:
+        consulta = consulta.where(
+            Produto.categoria.ilike(categoria)
+        )
+
+    if sku is not None:
+        consulta = consulta.where(
+            Produto.sku.ilike(sku)
+        )
+
     resultado = db.execute(
-        select(Produto)
+        consulta
     )
 
     return list(resultado.scalars().all())
@@ -38,18 +58,18 @@ def listar_produtos(
 
 def buscar_produto_por_id(
     db: Session,
-    produto_id: int
+    produto_id: int,
 ) -> Produto | None:
     return db.get(
         Produto,
-        produto_id
+        produto_id,
     )
 
 
 def atualizar_produto(
     db: Session,
     produto: Produto,
-    dados: ProdutoUpdate
+    dados: ProdutoUpdate,
 ) -> Produto:
     campos = dados.model_dump(
         exclude_unset=True
@@ -59,7 +79,7 @@ def atualizar_produto(
         setattr(
             produto,
             campo,
-            valor
+            valor,
         )
 
     try:
@@ -77,7 +97,7 @@ def atualizar_produto(
 
 def deletar_produto(
     db: Session,
-    produto: Produto
+    produto: Produto,
 ) -> None:
     try:
         db.delete(produto)

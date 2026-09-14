@@ -11,7 +11,8 @@ def listar_movimentacoes(
     loja_id: int | None = None,
     produto_id: int | None = None,
     limit: int = 20,
-    offset: int = 0
+    offset: int = 0,
+    tipo: str | None = None,
 ) -> list[Movimentacao]:
     consulta = select(Movimentacao)
 
@@ -23,6 +24,11 @@ def listar_movimentacoes(
     if produto_id is not None:
         consulta = consulta.where(
             Movimentacao.produto_id == produto_id
+        )
+
+    if tipo is not None:
+        consulta = consulta.where(
+            Movimentacao.tipo == tipo
         )
 
     consulta = (
