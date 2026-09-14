@@ -13,7 +13,7 @@ from app.api.routes.usuarios import router as usuarios_router
 
 app = FastAPI(
     title="Estoque Multiloja API",
-    version="1.0.1",
+    version="1.1.0",
     description="API para controle de estoque de múltiplas lojas.",
 )
 
