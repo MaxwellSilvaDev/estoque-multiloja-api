@@ -1,24 +1,60 @@
+from app.core.config import settings
+from app.core.security import criar_token_acesso
+from app.crud.usuario import criar_usuario
+from app.schemas.usuario import UsuarioCreate
 from tests.conftest import client
 
 
-def test_registrar_entrada_e_atualizar_estoque():
+def criar_headers_admin(
+    db_session,
+):
+    admin = criar_usuario(
+        db_session,
+        UsuarioCreate(
+            nome="Administrador",
+            email="admin@example.com",
+            senha="SenhaSegura123",
+            perfil="admin",
+            loja_id=None,
+        ),
+    )
+
+    token = criar_token_acesso(
+        usuario_id=admin.id,
+        chave_secreta=settings.jwt_secret,
+    )
+
+    return {
+        "Authorization": f"Bearer {token}",
+    }
+
+
+def test_registrar_entrada_e_atualizar_estoque(
+    db_session,
+):
+    headers = criar_headers_admin(
+        db_session,
+    )
+
     resposta_loja = client.post(
         "/lojas",
+        headers=headers,
         json={
             "nome": "Loja Teste",
             "endereco": "Rua Teste, 100",
-            "tipo": "matriz"
-        }
+            "tipo": "matriz",
+        },
     )
 
     resposta_produto = client.post(
         "/produtos",
+        headers=headers,
         json={
             "nome": "Notebook Teste",
             "categoria": "Informática",
             "preco": 3500.00,
-            "sku": "NOTE-MOV-001"
-        }
+            "sku": "NOTE-MOV-001",
+        },
     )
 
     loja_id = resposta_loja.json()["id"]
@@ -26,11 +62,12 @@ def test_registrar_entrada_e_atualizar_estoque():
 
     resposta_entrada = client.post(
         "/movimentacoes/entrada",
+        headers=headers,
         json={
             "produto_id": produto_id,
             "loja_id": loja_id,
-            "quantidade": 10
-        }
+            "quantidade": 10,
+        },
     )
 
     assert resposta_entrada.status_code == 201
@@ -41,7 +78,8 @@ def test_registrar_entrada_e_atualizar_estoque():
     assert movimentacao["quantidade"] == 10
 
     resposta_estoque = client.get(
-        f"/estoques/loja/{loja_id}/produto/{produto_id}"
+        f"/estoques/loja/{loja_id}/produto/{produto_id}",
+        headers=headers,
     )
 
     assert resposta_estoque.status_code == 200
@@ -51,24 +89,32 @@ def test_registrar_entrada_e_atualizar_estoque():
     assert estoque["quantidade"] == 10
 
 
-def test_registrar_saida_e_atualizar_estoque():
+def test_registrar_saida_e_atualizar_estoque(
+    db_session,
+):
+    headers = criar_headers_admin(
+        db_session,
+    )
+
     resposta_loja = client.post(
         "/lojas",
+        headers=headers,
         json={
             "nome": "Loja Saída",
             "endereco": "Rua Saída, 200",
-            "tipo": "filial"
-        }
+            "tipo": "filial",
+        },
     )
 
     resposta_produto = client.post(
         "/produtos",
+        headers=headers,
         json={
             "nome": "Mouse Teste",
             "categoria": "Periféricos",
             "preco": 100.00,
-            "sku": "MOUSE-MOV-001"
-        }
+            "sku": "MOUSE-MOV-001",
+        },
     )
 
     loja_id = resposta_loja.json()["id"]
@@ -76,22 +122,24 @@ def test_registrar_saida_e_atualizar_estoque():
 
     resposta_entrada = client.post(
         "/movimentacoes/entrada",
+        headers=headers,
         json={
             "produto_id": produto_id,
             "loja_id": loja_id,
-            "quantidade": 10
-        }
+            "quantidade": 10,
+        },
     )
 
     assert resposta_entrada.status_code == 201
 
     resposta_saida = client.post(
         "/movimentacoes/saida",
+        headers=headers,
         json={
             "produto_id": produto_id,
             "loja_id": loja_id,
-            "quantidade": 3
-        }
+            "quantidade": 3,
+        },
     )
 
     assert resposta_saida.status_code == 201
@@ -102,7 +150,8 @@ def test_registrar_saida_e_atualizar_estoque():
     assert movimentacao["quantidade"] == 3
 
     resposta_estoque = client.get(
-        f"/estoques/loja/{loja_id}/produto/{produto_id}"
+        f"/estoques/loja/{loja_id}/produto/{produto_id}",
+        headers=headers,
     )
 
     assert resposta_estoque.status_code == 200
@@ -112,24 +161,32 @@ def test_registrar_saida_e_atualizar_estoque():
     assert estoque["quantidade"] == 7
 
 
-def test_saida_com_saldo_insuficiente():
+def test_saida_com_saldo_insuficiente(
+    db_session,
+):
+    headers = criar_headers_admin(
+        db_session,
+    )
+
     resposta_loja = client.post(
         "/lojas",
+        headers=headers,
         json={
             "nome": "Loja Saldo",
             "endereco": "Rua Saldo, 300",
-            "tipo": "matriz"
-        }
+            "tipo": "matriz",
+        },
     )
 
     resposta_produto = client.post(
         "/produtos",
+        headers=headers,
         json={
             "nome": "Teclado Teste",
             "categoria": "Periféricos",
             "preco": 200.00,
-            "sku": "TECLADO-MOV-001"
-        }
+            "sku": "TECLADO-MOV-001",
+        },
     )
 
     loja_id = resposta_loja.json()["id"]
@@ -137,22 +194,24 @@ def test_saida_com_saldo_insuficiente():
 
     resposta_entrada = client.post(
         "/movimentacoes/entrada",
+        headers=headers,
         json={
             "produto_id": produto_id,
             "loja_id": loja_id,
-            "quantidade": 5
-        }
+            "quantidade": 5,
+        },
     )
 
     assert resposta_entrada.status_code == 201
 
     resposta_saida = client.post(
         "/movimentacoes/saida",
+        headers=headers,
         json={
             "produto_id": produto_id,
             "loja_id": loja_id,
-            "quantidade": 10
-        }
+            "quantidade": 10,
+        },
     )
 
     assert resposta_saida.status_code == 400
@@ -162,7 +221,8 @@ def test_saida_com_saldo_insuficiente():
     )
 
     resposta_estoque = client.get(
-        f"/estoques/loja/{loja_id}/produto/{produto_id}"
+        f"/estoques/loja/{loja_id}/produto/{produto_id}",
+        headers=headers,
     )
 
     assert resposta_estoque.status_code == 200
@@ -172,33 +232,42 @@ def test_saida_com_saldo_insuficiente():
     assert estoque["quantidade"] == 5
 
 
-def test_filtrar_movimentacoes_por_loja():
+def test_filtrar_movimentacoes_por_loja(
+    db_session,
+):
+    headers = criar_headers_admin(
+        db_session,
+    )
+
     resposta_loja_1 = client.post(
         "/lojas",
+        headers=headers,
         json={
             "nome": "Loja 1",
             "endereco": "Rua Um, 100",
-            "tipo": "matriz"
-        }
+            "tipo": "matriz",
+        },
     )
 
     resposta_loja_2 = client.post(
         "/lojas",
+        headers=headers,
         json={
             "nome": "Loja 2",
             "endereco": "Rua Dois, 200",
-            "tipo": "filial"
-        }
+            "tipo": "filial",
+        },
     )
 
     resposta_produto = client.post(
         "/produtos",
+        headers=headers,
         json={
             "nome": "Monitor Teste",
             "categoria": "Informática",
             "preco": 1200.00,
-            "sku": "MONITOR-MOV-001"
-        }
+            "sku": "MONITOR-MOV-001",
+        },
     )
 
     loja_1_id = resposta_loja_1.json()["id"]
@@ -207,27 +276,30 @@ def test_filtrar_movimentacoes_por_loja():
 
     resposta_entrada_loja_1 = client.post(
         "/movimentacoes/entrada",
+        headers=headers,
         json={
             "produto_id": produto_id,
             "loja_id": loja_1_id,
-            "quantidade": 10
-        }
+            "quantidade": 10,
+        },
     )
 
     resposta_entrada_loja_2 = client.post(
         "/movimentacoes/entrada",
+        headers=headers,
         json={
             "produto_id": produto_id,
             "loja_id": loja_2_id,
-            "quantidade": 20
-        }
+            "quantidade": 20,
+        },
     )
 
     assert resposta_entrada_loja_1.status_code == 201
     assert resposta_entrada_loja_2.status_code == 201
 
     resposta = client.get(
-        f"/movimentacoes?loja_id={loja_1_id}"
+        f"/movimentacoes?loja_id={loja_1_id}",
+        headers=headers,
     )
 
     assert resposta.status_code == 200
@@ -241,24 +313,32 @@ def test_filtrar_movimentacoes_por_loja():
     assert movimentacoes[0]["quantidade"] == 10
 
 
-def test_paginacao_movimentacoes():
+def test_paginacao_movimentacoes(
+    db_session,
+):
+    headers = criar_headers_admin(
+        db_session,
+    )
+
     resposta_loja = client.post(
         "/lojas",
+        headers=headers,
         json={
             "nome": "Loja Paginação",
             "endereco": "Rua Paginação, 400",
-            "tipo": "matriz"
-        }
+            "tipo": "matriz",
+        },
     )
 
     resposta_produto = client.post(
         "/produtos",
+        headers=headers,
         json={
             "nome": "Produto Paginação",
             "categoria": "Teste",
             "preco": 300.00,
-            "sku": "PAGINACAO-001"
-        }
+            "sku": "PAGINACAO-001",
+        },
     )
 
     loja_id = resposta_loja.json()["id"]
@@ -267,21 +347,24 @@ def test_paginacao_movimentacoes():
     for quantidade in [5, 3, 2]:
         resposta = client.post(
             "/movimentacoes/entrada",
+            headers=headers,
             json={
                 "produto_id": produto_id,
                 "loja_id": loja_id,
-                "quantidade": quantidade
-            }
+                "quantidade": quantidade,
+            },
         )
 
         assert resposta.status_code == 201
 
     primeira_pagina = client.get(
-        "/movimentacoes?limit=2&offset=0"
+        "/movimentacoes?limit=2&offset=0",
+        headers=headers,
     )
 
     segunda_pagina = client.get(
-        "/movimentacoes?limit=2&offset=2"
+        "/movimentacoes?limit=2&offset=2",
+        headers=headers,
     )
 
     assert primeira_pagina.status_code == 200
