@@ -11,7 +11,7 @@ from app.api.routes.movimentacoes import router as movimentacoes_router
 
 app = FastAPI(
     title="Estoque Multiloja API",
-    version="1.0.0",
+    version="1.0.1",
     description="API para controle de estoque de múltiplas lojas."
 )
 
