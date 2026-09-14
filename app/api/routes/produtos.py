@@ -53,11 +53,17 @@ def cadastrar_produto(
     response_model=list[ProdutoResponse],
 )
 def consultar_produtos(
+    nome: str | None = None,
+    categoria: str | None = None,
+    sku: str | None = None,
     db: Session = Depends(get_db),
     usuario_atual: Usuario = Depends(obter_usuario_atual),
 ):
     return listar_produtos(
         db,
+        nome=nome,
+        categoria=categoria,
+        sku=sku,
     )
 
 

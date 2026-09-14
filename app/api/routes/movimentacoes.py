@@ -31,6 +31,7 @@ router = APIRouter(
 def consultar_movimentacoes(
     loja_id: int | None = None,
     produto_id: int | None = None,
+    tipo: str | None = None,
     limit: int = Query(
         default=20,
         ge=1,
@@ -58,6 +59,7 @@ def consultar_movimentacoes(
         produto_id=produto_id,
         limit=limit,
         offset=offset,
+        tipo=tipo,
     )
 
 
