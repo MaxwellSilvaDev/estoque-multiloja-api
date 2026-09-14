@@ -10,6 +10,7 @@ from app.crud.estoque import (
     atualizar_estoque_minimo,
     buscar_estoque,
     listar_estoque_por_loja,
+    listar_estoques_baixos_por_loja,
 )
 from app.db.session import get_db
 from app.models.usuario import Usuario
@@ -40,6 +41,26 @@ def consultar_estoque_da_loja(
     )
 
     return listar_estoque_por_loja(
+        db,
+        loja_id,
+    )
+
+
+@router.get(
+    "/loja/{loja_id}/alertas/baixo",
+    response_model=list[EstoqueResponse],
+)
+def consultar_estoques_baixos_da_loja(
+    loja_id: int,
+    db: Session = Depends(get_db),
+    usuario_atual: Usuario = Depends(obter_usuario_atual),
+):
+    validar_acesso_loja(
+        usuario_atual,
+        loja_id,
+    )
+
+    return listar_estoques_baixos_por_loja(
         db,
         loja_id,
     )
