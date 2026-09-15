@@ -469,13 +469,13 @@ POSTGRES_DB=estoque_multiloja
 DATABASE_URL=postgresql+psycopg2://seu_usuario:sua_senha@localhost:5432/estoque_multiloja
 
 JWT_SECRET=gere_uma_chave_secreta_forte
-JWT_ALGORITHM=HS256
-JWT_EXP_MINUTES=60
 
 DEMO_READ_ONLY=false
 ```
 
 > Nunca envie o arquivo `.env`, senhas, `DATABASE_URL` real ou `JWT_SECRET` para o repositório.
+>
+> Na v1.1.0, o algoritmo JWT (`HS256`) e a expiração do token (60 minutos) estão definidos diretamente no código e não são configuráveis por variáveis de ambiente.
 
 ---
 
