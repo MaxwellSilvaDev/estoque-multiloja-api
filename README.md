@@ -249,7 +249,6 @@ estoque-multiloja-api/
 │   │   └── usuario.py
 │   │
 │   ├── schemas/
-│   │   ├── auth.py
 │   │   ├── estoque.py
 │   │   ├── loja.py
 │   │   ├── movimentacao.py
@@ -261,10 +260,6 @@ estoque-multiloja-api/
 │   │
 │   └── main.py
 │
-├── docs/
-│   └── superpowers/
-│       ├── plans/
-│       └── specs/
 │
 ├── tests/
 │
